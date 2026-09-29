@@ -1,81 +1,574 @@
-<<<<<<< HEAD
+# 🛡️ EXE-SOC
 
-EXE SOC
-A lightweight Security Operations Center (SOC) monitoring platform built with Flask and SQLite. It collects logs from servers and agents, detects suspicious activity with rule-based detection, and gives analysts a live dashboard to investigate and respond.
+**EXE-SOC** is a lightweight Security Operations Center (SOC) monitoring platform built with **Python, Flask, and SQLite**. It collects security events from servers and endpoints, analyzes activity using rule-based detection, and provides security analysts with a live dashboard for monitoring, investigation, and response.
 
-Everything on the dashboard is computed from real data stored in soc.db.
+The platform is designed as a practical SOC project for learning, security monitoring, incident investigation, and small-scale security operations.
 
-Features
-Live dashboard – alert counts, severity breakdown, 24 h timeline, top attacking IPs, threat map, endpoint health, system resources
-Detection rules – SQL injection, XSS, path traversal, brute force, malware keywords, privilege escalation, port scans, DNS anomalies
-Automatic escalation – repeated failed logins and IOC / blocklist hits become Critical; repeated identical alerts merge (count ×N)
-Investigation drawer – click any alert or IP for triggering raw events, ±30 min surrounding activity, MITRE ATT&CK technique, recommended actions, endpoint context, analyst notes and a full IP profile (risk score, first/last seen, targeted hosts and ports, 24 h activity)
-SPL-style search – index=events "failed password" | stats count by source_ip | sort -count | head 10
-Playbooks – auto-block IPs, open cases, notify analysts, isolate endpoints
-Cases, IOCs, blocklist, reports (CSV export), audit trail
-Role-based access – viewer, analyst, admin
-Endpoint agent – heartbeat plus log forwarding
-Screenshots
-Add screenshots of the dashboard and the alert drawer here (docs/dashboard.png, docs/alert-drawer.png).
+---
 
-Quick start
+## 🚀 Features
+
+### 📊 SOC Dashboard
+
+* Real-time alert monitoring
+* Alert severity breakdown
+* 24-hour activity timeline
+* Top attacking/source IPs
+* Threat map
+* Endpoint health monitoring
+* System resource monitoring
+* Live event updates
+
+### 🔍 Security Detection
+
+EXE-SOC includes rule-based detection for common suspicious activities:
+
+* SQL Injection
+* Cross-Site Scripting (XSS)
+* Path Traversal
+* Brute Force Attacks
+* Malware-related keywords
+* Privilege Escalation indicators
+* Port Scanning
+* DNS anomalies
+* IOC and blocklist matches
+
+### 🚨 Alert Management
+
+* Automatic alert severity escalation
+* Repeated failed-login detection
+* IOC/blocklist escalation
+* Alert deduplication
+* Alert occurrence counting
+* Analyst investigation workflow
+
+### 🔎 Investigation
+
+Analysts can investigate alerts and IP addresses through the investigation interface.
+
+Information includes:
+
+* Triggering events
+* Surrounding activity
+* Source and destination information
+* MITRE ATT&CK technique mapping
+* Recommended actions
+* Endpoint context
+* Analyst notes
+* IP risk information
+* First and last seen timestamps
+* Targeted hosts and ports
+* 24-hour IP activity
+
+### 📋 SOC Management
+
+* Cases
+* IOCs
+* IP blocklist
+* Audit trail
+* Security reports
+* CSV report export
+* Playbooks
+* Role-based access control
+
+### 🤖 Endpoint Agent
+
+The project includes an endpoint agent capable of:
+
+* Sending heartbeat information
+* Forwarding logs
+* Monitoring endpoint activity
+
+---
+
+## 🏗️ Architecture
+
+```text
+                ┌─────────────────────┐
+                │     Endpoints       │
+                │  Servers / Agents   │
+                └──────────┬──────────┘
+                           │
+                           │ Logs / Events
+                           ▼
+                ┌─────────────────────┐
+                │    Ingest API       │
+                │    Flask Server     │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │ Detection Engine    │
+                │                     │
+                │ Rules / IOC /       │
+                │ Brute Force / etc.  │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │      SQLite DB      │
+                │       soc.db        │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │    SOC Dashboard    │
+                │                     │
+                │ Alerts / Cases      │
+                │ Investigation       │
+                │ Reports / Playbooks │
+                └─────────────────────┘
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+EXE-SOC/
+│
+├── app.py
+├── db.py
+├── engine.py
+├── investigate.py
+├── requirements.txt
+├── run.sh
+├── README.md
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── ...
+│
+├── templates/
+│   ├── dashboard.html
+│   ├── login.html
+│   └── ...
+│
+└── tools/
+    ├── agent.py
+    ├── simulate.py
+    └── selftest.py
+```
+
+---
+
+# ⚙️ Requirements
+
+* Python **3.9+**
+* Flask
+* SQLite
+* `pip`
+* Linux or Windows environment
+
+Install the required Python packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 📥 Installation
+
+Clone the repository:
+
+```bash
 git clone https://github.com/sabari9496/ExE-SOC-Tool.git
+```
+
+Move into the project directory:
+
+```bash
 cd ExE-SOC-Tool
-./run.sh                 # creates .venv, installs deps, starts on http://127.0.0.1:5000
-./run.sh --no-demo       # start with an empty database (recommended for real use)
-Requires Python 3.9+. Default logins (change them before real use):
+```
 
-User	Password	Role
-admin	Admin@123	full access
-analyst	Analyst@123	triage and respond
-viewer	Viewer@123	read-only
-Override before the first run with SOC_ADMIN_PASSWORD, SOC_ANALYST_PASSWORD, SOC_VIEWER_PASSWORD. Other env vars: SOC_HOST (default 127.0.0.1), SOC_PORT, SOC_DB, SOC_SECRET.
+Install dependencies:
 
-Roles
-viewer = read only · analyst = triage alerts, cases, block IPs, IOCs, isolate endpoints · admin = users, playbooks, settings, purge.
+```bash
+pip install -r requirements.txt
+```
 
-How data gets in
-Ingest API – POST /api/ingest with header X-API-Key (Settings → API key):
-curl -X POST http://127.0.0.1:5000/api/ingest -H "X-API-Key: KEY" -H "Content-Type: application/json" \
-     -d '{"source_ip":"1.2.3.4","message":"Failed password for root"}'
-Body is one event or a list: {"source_ip","message","dest_ip","host"}.
-Agent – python tools/agent.py --server URL --key KEY [--follow /var/log/auth.log] (needs psutil, requests)
-Log tail – the server follows the file set in Settings → "Auth log" (default /var/log/auth.log; needs read permission, e.g. add the service user to the adm group)
-Demo – python tools/simulate.py --key KEY streams random attacks so you can watch the dashboard move
-Detection and response
-Regex rules with severity and category; brute force escalates to Critical after N failures in M minutes (Settings)
-Blocking records the IP; enable Enforce with iptables in Settings (root required) to actually drop traffic
-Playbooks run automatically and are editable in the UI
-Search (SPL-style)
-index=events|alerts field=value "free text" | stats count by f | top f | timechart span=1h | sort -f | head N | table a b | dedup f Operators: = != > < * wildcard, NOT.
+Start the application:
 
-API summary
-/api/dashboard /api/alerts /api/alerts/<id>/detail /api/investigate/ip/<ip> /api/spl /api/endpoints /api/cases /api/blocklist /api/iocs /api/intel/<ip> /api/events /api/audit /api/playbooks /api/reports /api/reports/export.csv /api/users /api/settings /api/search /api/system State-changing browser calls need header X-Requested-With: fetch (CSRF guard); ingest and heartbeat use the API key instead.
+```bash
+./run.sh
+```
 
-Testing
-Start on an empty database, then run the 76 automated checks:
+The dashboard will normally be available at:
 
-SOC_DB=/tmp/test.db ./run.sh --no-demo      # terminal 1
-python tools/selftest.py                    # terminal 2
-Never run the self-test against production data. It covers auth/RBAC, detection rules, dedupe, escalation, playbooks, IOCs, drill-down, SPL, cases, reports, pages and login lockout.
+```text
+http://127.0.0.1:5000
+```
 
-Deploying on a server
-Keep SOC_HOST=127.0.0.1 and put nginx or Caddy in front with HTTPS; pass WebSocket headers (Upgrade, Connection "upgrade", Host) so live push works
-Run as a normal user under systemd; run only one instance (workers and lockout state are in memory)
-Set your own passwords and use --no-demo
-The UI loads Chart.js, Leaflet and Socket.IO from public CDNs; without internet the charts and map will be blank
-IP geolocation calls ip-api.com over HTTP; turn it off in Settings if that is a concern
-Back up soc.db regularly
-Security notes
-Passwords are hashed (scrypt), login locks out after 5 failures in 5 minutes, session cookies are HttpOnly + SameSite, CSV export neutralises formula injection, and HTML output is escaped. Never commit soc.db, .secret or .env (already in .gitignore).
+### Windows
 
-Limitations
-Detection is pattern-based, so it recognises known attack text rather than unusual behaviour. It does not yet receive syslog, read Windows Event Logs, or inspect network traffic (use Suricata or Zeek and forward their logs). SQLite suits small to medium log volumes. This is a monitoring aid, not a replacement for a commercial SIEM.
+If `run.sh` is not suitable for your Windows environment, start the Flask application directly:
 
-Legal
-Only monitor networks and systems you are authorised to monitor, and make sure users are informed according to your organisation's policy.
+```powershell
+python app.py
+```
 
-License
-Add a license file (for example MIT) before making the repository public.
-ExE-SOC-Tool
-Lightweight open-source SOC monitoring platform built with Flask and SQLite. Ingests logs via API, agents and syslog-style feeds, detects attacks with rules, and shows live alerts, threat map, cases and playbooks. Splunk-style drill-down on any alert or IP, plus a built-in SPL-like search.
+---
+
+# 🔐 Default Login
+
+The development environment includes default accounts:
+
+| Username  | Password      | Role                             |
+| --------- | ------------- | -------------------------------- |
+| `admin`   | `Admin@123`   | Full access                      |
+| `analyst` | `Analyst@123` | Alert investigation and response |
+| `viewer`  | `Viewer@123`  | Read-only                        |
+
+> ⚠️ **Important:** Change the default credentials before deploying the platform in a real environment.
+
+You can configure passwords using:
+
+```text
+SOC_ADMIN_PASSWORD
+SOC_ANALYST_PASSWORD
+SOC_VIEWER_PASSWORD
+```
+
+Other supported environment variables include:
+
+```text
+SOC_HOST
+SOC_PORT
+SOC_DB
+SOC_SECRET
+```
+
+---
+
+# 📡 Event Ingestion
+
+EXE-SOC supports event ingestion through an API.
+
+Example:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/ingest \
+-H "X-API-Key: YOUR_API_KEY" \
+-H "Content-Type: application/json" \
+-d '{"source_ip":"1.2.3.4","message":"Failed password for root"}'
+```
+
+Supported event fields include:
+
+```json
+{
+  "source_ip": "1.2.3.4",
+  "message": "Failed password for root",
+  "dest_ip": "10.0.0.5",
+  "host": "server01"
+}
+```
+
+---
+
+# 🤖 Endpoint Agent
+
+The included endpoint agent can forward system logs and heartbeat information to the SOC server.
+
+Example:
+
+```bash
+python tools/agent.py --server URL --key KEY
+```
+
+For Linux authentication logs:
+
+```bash
+python tools/agent.py --server URL --key KEY --follow /var/log/auth.log
+```
+
+The agent requires additional packages such as:
+
+```bash
+pip install psutil requests
+```
+
+---
+
+# 🧪 Demo Mode
+
+EXE-SOC includes a simulation tool for generating sample security events.
+
+```bash
+python tools/simulate.py --key KEY
+```
+
+This can be used to demonstrate:
+
+* Failed login alerts
+* Attack detection
+* Alert escalation
+* IP investigation
+* Dashboard activity
+* SOC response workflows
+
+---
+
+# 🔎 SPL-Style Search
+
+EXE-SOC provides an SPL-style search interface for investigating events.
+
+Example:
+
+```text
+index=events "failed password" | stats count by source_ip | sort -count | head 10
+```
+
+Supported operations include:
+
+```text
+=
+!=
+>
+<
+*
+NOT
+```
+
+Example searches:
+
+```text
+index=events source_ip=1.2.3.4
+```
+
+```text
+index=alerts severity=Critical
+```
+
+---
+
+# 🚨 Detection & Response
+
+The detection engine uses pattern-based rules to identify suspicious activity.
+
+Example detection categories:
+
+```text
+SQL Injection
+XSS
+Path Traversal
+Brute Force
+Malware Indicators
+Privilege Escalation
+Port Scanning
+DNS Anomalies
+IOC Matches
+```
+
+Repeated failed login attempts can automatically increase alert severity.
+
+The platform also supports response actions such as:
+
+* Blocking IP addresses
+* Creating cases
+* Notifying analysts
+* Isolating endpoints
+* Running configured playbooks
+
+> ⚠️ Automatic network enforcement such as `iptables` requires appropriate privileges and should be tested carefully before use.
+
+---
+
+# 👥 Role-Based Access Control
+
+EXE-SOC provides three main roles:
+
+### Viewer
+
+Read-only access to SOC information.
+
+### Analyst
+
+Can:
+
+* Investigate alerts
+* Investigate IP addresses
+* Manage cases
+* Manage IOCs
+* Block IPs
+* Investigate endpoints
+* Add analyst notes
+
+### Administrator
+
+Can additionally:
+
+* Manage users
+* Configure settings
+* Manage playbooks
+* Manage system configuration
+* Perform administrative operations
+
+---
+
+# 🧪 Testing
+
+The project includes automated security and functionality tests.
+
+Run the application using an empty test database and execute:
+
+```bash
+python tools/selftest.py
+```
+
+The test suite covers areas such as:
+
+* Authentication
+* RBAC
+* Detection rules
+* Alert deduplication
+* Alert escalation
+* Playbooks
+* IOCs
+* Investigation
+* SPL search
+* Cases
+* Reports
+* Login protection
+
+> ⚠️ Never run automated tests against production SOC data.
+
+---
+
+# 🔒 Security
+
+EXE-SOC includes several security protections:
+
+* Password hashing using **scrypt**
+* Login lockout after repeated failures
+* HttpOnly session cookies
+* SameSite cookie protection
+* HTML output escaping
+* CSV formula-injection protection
+* CSRF protection for state-changing browser requests
+* API-key authentication for ingestion
+
+---
+
+# 🌐 Deployment
+
+For server deployment:
+
+```text
+Internet
+   │
+   ▼
+Nginx / Caddy
+   │
+   │ HTTPS
+   ▼
+EXE-SOC Flask Application
+   │
+   ▼
+SQLite Database
+```
+
+Recommended deployment practices:
+
+* Use HTTPS
+* Keep the Flask application behind a reverse proxy
+* Use strong passwords
+* Change default credentials
+* Use `--no-demo`
+* Restrict database access
+* Back up the database
+* Protect API keys
+* Run the service using a dedicated user
+* Avoid exposing the Flask development server directly to the Internet
+
+---
+
+# ⚠️ Limitations
+
+EXE-SOC is a lightweight SOC monitoring platform and has some limitations.
+
+* Detection is primarily rule/pattern based
+* It does not replace a commercial SIEM
+* SQLite is intended for small-to-medium workloads
+* Windows Event Log collection is not currently implemented
+* Native network packet inspection is not included
+* Advanced behavioral analytics are not implemented
+* Production deployments should use additional security controls
+
+For network monitoring, technologies such as **Zeek** or **Suricata** can be integrated to provide additional network security telemetry.
+
+---
+
+# 📸 Screenshots
+
+Add screenshots of the project here:
+
+```text
+docs/
+├── dashboard.png
+├── alerts.png
+├── investigation.png
+└── threat-map.png
+```
+
+Example:
+
+```markdown
+![EXE-SOC Dashboard](docs/dashboard.png)
+```
+
+---
+
+# 🔮 Future Improvements
+
+Planned improvements may include:
+
+* Windows Event Log integration
+* Syslog support
+* Zeek integration
+* Suricata integration
+* Advanced threat intelligence
+* Machine-learning-based anomaly detection
+* Improved endpoint monitoring
+* Docker deployment
+* PostgreSQL support
+* Email/Telegram/Slack notifications
+* Advanced MITRE ATT&CK mapping
+* Multi-tenant SOC support
+
+---
+
+# ⚖️ Legal Notice
+
+EXE-SOC is intended for **authorized security monitoring and defensive security purposes only**.
+
+Only monitor systems, networks, endpoints, and users when you have appropriate authorization.
+
+The developers and contributors are not responsible for unauthorized use of this software.
+
+---
+
+# 📄 License
+
+This project is released under the **MIT License**.
+
+See the `LICENSE` file for details.
+
+---
+
+# 👨‍💻 Author
+
+**Sabareesh**
+
+Cybersecurity | VAPT | SOC | Web & API Security
+
+---
+
+## ⭐ Project
+
+If you find EXE-SOC useful for learning or security research, consider giving the repository a ⭐ on GitHub.
+
+**Repository:**
+https://github.com/sabari9496/ExE-SOC-Tool
