@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}SOC Dashboard{% endblock %}
+{% block content %}
+<div class="head"><div><h1>SOC Dashboard</h1><p>Overview of your security operations</p></div>
+<div class="clock"><span><svg class="ic"><use href="#i-cal"/></svg><b id="cDate"></b></span><span><svg class="ic"><use href="#i-clock"/></svg><b id="cTime"></b></span></div></div>
+<div class="grid g6" style="margin-bottom:14px" id="kpis"></div>
+<div class="grid g3" style="margin-bottom:14px">
+ <div class="card"><h3>Alerts by Severity</h3><div class="row"><div class="dwrap"><canvas id="cSev"></canvas><div class="mid"><b id="sevTotal">0</b><small>Total</small></div></div><div class="legend" id="sevLegend"></div></div></div>
+ <div class="card"><h3>Alerts Over Time <span style="color:var(--muted);font-weight:400;font-size:13px">(Last 24 Hours)</span></h3><div style="height:170px"><canvas id="cTime2"></canvas></div></div>
+ <div class="card"><h3>Top Attacking IPs <a href="/threat-intel">View All</a></h3><div class="bars" id="topIps"></div></div>
+</div>
+<div class="grid g3" style="margin-bottom:14px">
+ <div class="card"><h3>Endpoint Status</h3><div class="row"><div class="dwrap"><canvas id="cEnd"></canvas><div class="mid"><b id="endTotal">0</b><small>Total Endpoints</small></div></div><div class="legend" id="endLegend"></div></div></div>
+ <div class="card"><h3>Threat Map <a href="/network">View Full Map</a></h3><div id="map" class="map"></div></div>
+ <div class="card"><h3>Recent Alerts <a href="/alerts">View All</a></h3><div id="recent"></div></div>
+</div>
+<div class="grid" style="grid-template-columns:2.2fr 1fr">
+ <div class="card"><h3>Latest Security Events</h3><div class="tw"><table><thead><tr><th>Time</th><th>Severity</th><th>Source</th><th>Event</th><th>Destination</th><th>Status</th></tr></thead><tbody id="events"></tbody></table></div></div>
+ <div class="card"><h3>System Resources <a href="/endpoints">View Details</a></h3><div class="gauges"><div class="gauge"><small>CPU Usage</small><canvas id="gCpu"></canvas><b id="vCpu">–</b></div><div class="gauge"><small>RAM Usage</small><canvas id="gRam"></canvas><b id="vRam">–</b></div></div></div>
+</div>
+{% endblock %}

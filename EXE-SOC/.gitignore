@@ -1,0 +1,8 @@
+soc.db*
+.secret
+.venv/
+__pycache__/
+*.pyc
+*.log
+.env
+.DS_Store

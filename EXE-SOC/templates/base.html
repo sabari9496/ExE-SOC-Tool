@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{% endblock %} · SOC</title>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body data-page="{{ page }}" data-role="{{ session.role }}" data-user="{{ session.user }}">
+{% include "_icons.html" %}
+{% macro ic(n) %}<svg class="ic"><use href="#i-{{ n }}"/></svg>{% endmacro %}
+{% set nav = [('/','dashboard','Dashboard','grid'),('/alerts','alerts','Alerts','bell'),('/endpoints','endpoints','Endpoints','monitor'),('/network','network','Network','network'),('/threat-intel','intel','Threat Intelligence','globe'),('/cases','cases','Cases','file'),('/reports','reports','Reports','clip'),('/search','search','Search (SPL)','search'),('/logs','logs','Logs','list'),('/playbooks','playbooks','Playbooks','play'),('/settings','settings','Settings','sliders'),('/users','users','Users','users')] %}
+<div class="app">
+  <div class="brand"><svg class="ic"><use href="#i-shield"/></svg><div><b><span id="org">EXE</span> <i>SOC</i></b><small>Monitoring System</small></div></div>
+  <header class="top">
+    <div class="search"><input id="gs" placeholder="Search alerts, users, IP, events..." aria-label="Search" autocomplete="off"><svg class="ic"><use href="#i-search"/></svg><div class="dd" id="dd" hidden></div></div>
+    <div class="sp"></div>
+    <a class="tbtn" href="/alerts" aria-label="New critical/high alerts">{{ ic('bell') }}<span class="badge" id="bellBadge" data-z="1">0</span></a>
+    <a class="tbtn" href="/settings" aria-label="Settings">{{ ic('sliders') }}</a>
+    <button class="tbtn" id="theme" aria-label="Toggle theme">{{ ic('moon') }}</button>
+    <a class="tbtn" href="/logout" aria-label="Sign out">{{ ic('out') }}</a>
+    <div class="usr"><div class="av">{{ session.user[0]|upper }}</div><div>{{ session.user|capitalize }}<small>{{ {'admin':'SOC Admin','analyst':'SOC L1 Analyst','viewer':'Viewer'}[session.role] }}</small></div></div>
+  </header>
+  <aside class="side">
+    <nav>{% for href,key,label,icon in nav %}<a href="{{ href }}" class="{{ 'on' if page==key else '' }}">{{ ic(icon) }}{{ label }}{% if key=='alerts' %}<span class="badge" id="navBadge" data-z="1">0</span>{% endif %}</a>{% endfor %}</nav>
+    <div style="flex:1"></div>
+    <div class="box"><div><span class="dot" id="sysDot"></span><b>System Status</b></div><div class="ok" id="sysTxt" style="margin-top:6px">All Systems Operational</div></div>
+    <div class="box me"><div class="av">{{ session.user[0]|upper }}</div><div><b>{{ session.user|capitalize }}</b><small>{{ {'admin':'SOC Admin','analyst':'SOC L1 Analyst','viewer':'Viewer'}[session.role] }}</small><span class="ok"><span class="dot" style="width:8px;height:8px"></span>Online</span></div></div>
+  </aside>
+  <main class="main">{% block content %}{% endblock %}</main>
+</div>
+<div class="toast" id="toast"></div>
+<div id="drawerBg" hidden></div><aside id="drawer" hidden></aside>
+<script src="/static/app.js"></script>
+</body></html>

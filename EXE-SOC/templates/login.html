@@ -1,0 +1,6 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in</title><link rel="stylesheet" href="/static/app.css"></head>
+<body><div class="login"><form method="POST" autocomplete="on">
+<div class="brand"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><b>EXE <i>SOC</i></b><small>Monitoring System</small></div></div>
+<p>Sign in to continue</p>{% if error %}<div class="err">{{ error }}</div>{% endif %}
+<input name="username" placeholder="Username" required autofocus autocomplete="username"><input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+<button class="btn" type="submit">Sign in</button></form></div></body></html>
