@@ -1,0 +1,14 @@
+# Open-source beta release checklist (nothing is published by this repo's tooling)
+- [ ] Owner approves licence; add LICENSE and THIRD-PARTY-NOTICES
+- [ ] Rotate every credential that ever appeared in any archive/commit (incl. the `.secret` shipped in the Pass 4 zip); remove old key files from all copies
+- [ ] `python tools/release_check.py --history` clean on a real clone; `gitleaks detect` / `trufflehog git` run and reviewed
+- [ ] Sanitise internal hostnames/IPs and any real telemetry; no database files tracked
+- [ ] `pip-audit`, `bandit -r .` reviewed; hash-locked requirements generated from real artifacts
+- [ ] `tools/vendor_assets.py` run, hashes checked against publisher values, CSP shows no CDN hosts
+- [ ] `nginx -t`, TLS handshake, WebSocket upgrade, forged `X-Forwarded-*` ignored (on a real host)
+- [ ] Real Socket.IO test: origin check, revoked/disabled session disconnect
+- [ ] systemd install/upgrade/uninstall/reinstall/kill -9 restart on a VM
+- [ ] Windows agent install/upgrade/uninstall/reinstall on a real host
+- [ ] Playwright XSS run with hostile strings
+- [ ] SECURITY.md contact filled in; known limitations reviewed
+- [ ] Owner makes the repository public (never done automatically)

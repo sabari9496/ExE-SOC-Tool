@@ -1,0 +1,79 @@
+soc.db*
+.secret
+.venv/
+__pycache__/
+*.pyc
+*.log
+.env
+.DS_Store
+.eventlog_cursor.json
+.winevents_cursor.json
+*.other-machine-*
+.locallogs_cursor.json
+.linuxlogs_cursor.json
+.fim_state.json
+.malware_state.json
+.env
+*.env
+.secret
+soc.db*
+certs/
+initial_admin_credentials.txt
+.soc_enc_key
+*.db
+*.db-wal
+*.db-shm
+backups/
+
+# secret material (never commit)
+*.pem
+*.key
+.soc_enc_key
+initial_admin_credentials.txt
+initial-admin-password.txt
+.soc_enc_keys
+*.env.local
+backups/
+restored*.db
+
+# Phase 2: database backups and pre-migration backups must never be committed
+backups/
+backups-premigrate/
+exesoc-*.db
+exesoc-*.db.json
+*.replaced-*
+
+# test evidence output
+test-results/
+# Secrets and environment files
+.secret
+.env
+.env.*
+!.env.example
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python environments and cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Database backups
+backups/
+backups-premigrate/
+exesoc-*.db
+exesoc-*.db.json
+*.replaced-*
+
+# Test evidence
+test-results/

@@ -1,0 +1,36 @@
+# /etc/systemd/system/soc.service  - TEMPLATE. Validate with: systemd-analyze verify soc.service ; systemd-analyze security soc.service
+[Unit]
+Description=EXE-SOC (gunicorn behind TLS reverse proxy)
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=exesoc
+Group=exesoc
+WorkingDirectory=/opt/exe-soc
+EnvironmentFile=/etc/exe-soc/env
+Environment=SOC_ENV=production PYTHONUNBUFFERED=1
+# ONE worker: background threads, Socket.IO session table and in-process state live in the worker (see docs/DEPLOYMENT.md)
+ExecStart=/opt/exe-soc/.venv/bin/gunicorn -k gthread --threads 8 -w 1 -b 127.0.0.1:5000 --timeout 60 --graceful-timeout 20 --access-logfile - wsgi:app
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+# --- least privilege / sandbox ---
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+ReadWritePaths=/var/lib/exe-soc /var/backups/exe-soc
+LimitNOFILE=4096
+UMask=0077
+[Install]
+WantedBy=multi-user.target

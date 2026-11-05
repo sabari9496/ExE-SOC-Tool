@@ -1,0 +1,28 @@
+"""Plain-language list of the detections that come from activity analysis (shown on the Detection rules page). Documentation only: the logic lives in activity.py / engine.py."""
+D = lambda t, s, c, src, what: dict(title=t, severity=s, category=c, source=src, what=what)
+ACTIVITY_RULES = [
+ D("Suspicious PowerShell (encoded command)", "High", "process", "Process start", "PowerShell started with an encoded command (-enc)."),
+ D("Suspicious PowerShell (download and execute)", "High", "process", "Process start", "PowerShell downloading and running code (IEX, DownloadString, hidden window)."),
+ D("Suspicious PowerShell Script", "High", "process", "PowerShell log", "A logged PowerShell script block contains attack patterns."),
+ D("Credential Dumping Attempt", "Critical", "process", "Process start / Sysmon", "mimikatz, LSASS access, SAM/NTDS export."),
+ D("Reverse Shell Command", "Critical", "process", "Process start", "bash /dev/tcp, nc -e, socat exec, python/perl/php socket shells."),
+ D("Remote Script Download and Execute", "High", "process", "Process start", "curl or wget piped into a shell, base64 piped into a shell."),
+ D("Suspicious Command (living-off-the-land)", "High", "process", "Process start", "certutil, bitsadmin, mshta, regsvr32, rundll32, wmic used to fetch or run code."),
+ D("Backup / Recovery Destruction Command", "Critical", "process", "Process start", "Shadow copies or backups deleted, recovery disabled (ransomware sign)."),
+ D("Security Tool Tampering Command", "High", "process", "Process start", "Defender or firewall switched off from the command line."),
+ D("Log / History Tampering Command", "High", "process", "Process start", "Event logs cleared, shell history wiped, system logs truncated."),
+ D("Local Account Created via Command Line", "High", "process", "Process start", "net user /add or adding to Administrators from the command line."),
+ D("Sensitive File Read (/etc/shadow)", "High", "process", "Process start", "A command reads the password hash file."),
+ D("Process Executed From Temporary Location", "Medium", "process", "Process start", "A program runs from /tmp, /var/tmp, /dev/shm, Temp, Downloads or Public."),
+ D("Office Application Spawned a Shell", "High", "process", "Process start", "Word, Excel, PowerPoint or Outlook started cmd, PowerShell or a script host."),
+ D("Web Server Spawned a Shell", "High", "process", "Process start", "nginx, apache, php or similar started a shell (web shell sign)."),
+ D("Shell Process Network Connection", "High", "network", "Network monitor / Sysmon", "A shell program connects to a public IP address."),
+ D("Connection To Suspicious Port", "Medium", "network", "Network monitor", "Outbound connection to ports often used by backdoors (4444, 1337, 31337 ...)."),
+ D("Remote Thread Injection", "Medium", "process", "Sysmon", "A process created a thread inside another process."),
+ D("Suspicious Service Installed", "High", "persistence", "Service install event", "A new service runs from a temp path or through PowerShell/cmd."),
+ D("Account Locked Out", "Medium", "auth", "Security log", "An account was locked after failed logins."),
+ D("Security Tool Disabled", "High", "system", "Defender log", "Windows Defender real-time protection or scanning was turned off."),
+ D("Successful Login After Multiple Failures", "Critical", "auth", "Login activity", "A login succeeds from an IP that failed many times in the last 10 minutes."),
+ D("Login Outside Business Hours", "Medium", "auth", "Login activity", "Interactive login outside the hours you set (off by default: SOC_BUSINESS_HOURS or the Settings field)."),
+ D("Known-bad source", "Critical", "any", "Threat list / blocklist", "Any alert whose IP is on your threat list or blocklist is raised to Critical."),
+]

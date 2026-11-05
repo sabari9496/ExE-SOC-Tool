@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{% endblock %} · SOC</title>
+<link rel="stylesheet" href="/static/app.css">
+{% if vendor %}<link rel="stylesheet" href="/static/vendor/leaflet.css" integrity="{{ vendor['leaflet.css'].sri }}">
+<script src="/static/vendor/socket.io.min.js" integrity="{{ vendor['socket.io.min.js'].sri }}"></script>
+<script src="/static/vendor/chart.umd.min.js" integrity="{{ vendor['chart.umd.min.js'].sri }}"></script>
+<script src="/static/vendor/leaflet.js" integrity="{{ vendor['leaflet.js'].sri }}"></script>
+{% else %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>{% endif %}
+</head>
+<body data-page="{{ page }}" data-role="{{ session.role }}" data-user="{{ session.user }}">
+{% include "_icons.html" %}
+{% macro ic(n) %}<svg class="ic"><use href="#i-{{ n }}"/></svg>{% endmacro %}
+{% set groups = [('Monitor',[('/','dashboard','Dashboard','grid'),('/alerts','alerts','Alerts','bell'),('/activity','activity','Activity','list'),('/endpoints','endpoints','Endpoints','monitor'),('/monitoring-center','monitoring','Monitoring Center','grid'),('/fleet','fleet','Remote agents','monitor'),('/telemetry','telemetry','Telemetry','list'),('/network','network','Network','network')]),
+ ('Investigate',[('/incidents','incidents','Incidents','shield'),('/hunting','hunting','Threat hunting','search'),('/logs','logs','Logs','list'),('/search','search','Search (SPL)','search'),('/cases','cases','Cases','file'),('/threat-intel','intel','Threat Intelligence','globe'),('/vulnerabilities','vulns','Vulnerabilities','bug')]),
+ ('Respond',[('/playbooks','playbooks','Playbooks','play'),('/rules','rules','Detection rules','target'),('/detections','detections','Detection library','target'),('/false-positives','fpmgmt','False positives','sliders'),('/agent-health','health','Agent health','monitor')]),
+ ('Manage',[('/reports','reports','Reports','clip'),('/settings','settings','Settings','sliders'),('/email-notifications','email','Email notifications','bell'),('/users','users','Users','users')])] %}
+<div class="app">
+  <div class="brand"><svg class="ic"><use href="#i-shield"/></svg><div><b><span id="org">EXE</span> <i>SOC</i></b><small>Monitoring System</small></div></div>
+  <header class="top">
+    <div class="search"><input id="gs" placeholder="Search alerts, users, IP, events..." aria-label="Search" autocomplete="off"><svg class="ic"><use href="#i-search"/></svg><div class="dd" id="dd" hidden></div></div>
+    <div class="sp"></div>
+    <a class="tbtn" href="/alerts" aria-label="New critical/high alerts">{{ ic('bell') }}<span class="badge" id="bellBadge" data-z="1">0</span></a>
+    <a class="tbtn" href="/settings" aria-label="Settings">{{ ic('sliders') }}</a>
+    <button class="tbtn" id="theme" aria-label="Toggle theme">{{ ic('moon') }}</button>
+    <form method="post" action="/logout" style="display:inline;margin:0"><input type="hidden" name="csrf" value="{{ session.csrf }}"><button class="tbtn" type="submit" aria-label="Sign out">{{ ic('out') }}</button></form>
+    <div class="usr"><div class="av">{{ session.user[0]|upper }}</div><div>{{ session.user|capitalize }}<small>{{ {'admin':'SOC Admin','analyst':'SOC L1 Analyst','viewer':'Viewer'}[session.role] }}</small></div></div>
+  </header>
+  <aside class="side">
+    <nav>{% for g,items in groups %}<small class="grp">{{ g }}</small>{% for href,key,label,icon in items %}<a href="{{ href }}" class="{{ 'on' if page==key else '' }}">{{ ic(icon) }}{{ label }}{% if key=='alerts' %}<span class="badge" id="navBadge" data-z="1">0</span>{% endif %}</a>{% endfor %}{% endfor %}</nav>
+    <div style="flex:1"></div>
+    <div class="box"><div><span class="dot" id="sysDot"></span><b>System Status</b></div><div class="ok" id="sysTxt" style="margin-top:6px">All Systems Operational</div></div>
+    <div class="box me"><div class="av">{{ session.user[0]|upper }}</div><div><b>{{ session.user|capitalize }}</b><small>{{ {'admin':'SOC Admin','analyst':'SOC L1 Analyst','viewer':'Viewer'}[session.role] }}</small><span class="ok"><span class="dot" style="width:8px;height:8px"></span>Online</span></div></div>
+  </aside>
+  <main class="main">{% block content %}{% endblock %}</main>
+</div>
+<div class="toast" id="toast"></div>
+<div id="drawerBg" hidden></div><aside id="drawer" hidden></aside>
+<script src="/static/socx.js"></script>
+<script src="/static/notify.js"></script>
+<script src="/static/fleet.js"></script>
+<script src="/static/monitoring.js"></script>
+<script src="/static/unified.js"></script>
+<script src="/static/app.js"></script>
+</body></html>

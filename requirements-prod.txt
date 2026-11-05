@@ -1,0 +1,6 @@
+# Production extras (install on top of requirements.txt). Versions are intentionally unpinned here: pin and hash them with
+#   pip-compile --generate-hashes   on a networked build machine and review the result (see docs/DEPLOYMENT.md). No hashes are shipped because they could not be verified offline.
+-r requirements.txt
+gunicorn
+simple-websocket
+regex          # optional: gives custom-rule regexes a native per-match timeout; without it engine.py uses the killable worker in security/rxsandbox.py
